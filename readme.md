@@ -23,13 +23,17 @@ it with a parallel sort from the standard library you can either enable
 parallel mode with `-D_GLIBCXX_PARALLEL` or include these flags when compiling:
 `-ltbb -D_USETBB` to be able to use `std::execution::par` as execution policy.
 
+
 Please refer to the official sources for installation instructions of oneAPI Threading Building Blocks (oneTBB)
 
-[OneTBB install](https://github.com/oneapi-src/oneTBB/blob/master/INSTALL.md) 
-[Installing on linux (Intel)](https://www.intel.com/content/www/us/en/docs/onetbb/get-started-guide/2021-9/overview.html) 
+- [OneTBB install](https://github.com/oneapi-src/oneTBB/blob/master/INSTALL.md) 
+
+- [Installing on linux (Intel)](https://www.intel.com/content/www/us/en/docs/onetbb/get-started-guide/2021-9/overview.html) 
 
 
 ## Usage
+
+### Sample code
 
 ```cpp
 
@@ -55,10 +59,19 @@ int main(){
 }
 ```
 
-```Makefile
-g++ -Wall -std=c++17 -O3 -fopenmp -I./pbis/include main.cpp -o prog
+### Sample code
+```shell
+foo@bar:~$ g++ -Wall -std=c++17 -O3 -fopenmp -I./pbis/include main.cpp -o prog
+foo@bar:~$ ./prog
+TIME  >>>                 std::sort     0.65004909 [s]
+TIME  >>>                 bis::sort     0.68824921 [s]
+Sort result Ok
+TIME  >>>                 std::sort     0.64751839 [s]
+TIME  >>>       bis::parallel::sort     0.28056250 [s]
+Sort result Ok
+
+
 ```
 
 ```bash
-./prog
 ```

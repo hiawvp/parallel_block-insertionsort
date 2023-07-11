@@ -21,7 +21,6 @@ int main(int argc, char *argv[]) {
   datatype *sorted_copy = new datatype[n];
   datatype exit_code = 0;
   auto less_comp = std::less<datatype>();
-  auto greater_comp = std::greater<datatype>();
 
   gen_array(A, n);
   std::copy_n(A, n, sorted_copy);
@@ -50,6 +49,7 @@ int main(int argc, char *argv[]) {
   exit_code = exit_code || check_results(V.data(), SC.data(), n);
 
 #if defined(_USETBB)
+  auto greater_comp = std::greater<datatype>();
 
   std::cout << "tbb enabled" << std::endl;
   __gnu_parallel::_Settings s;
