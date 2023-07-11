@@ -18,8 +18,8 @@ const int PAR_DEFAULT_BLOCK_SIZE = 8;
 const int MWM_SWITCH_STRAT = 0;
 namespace sequential_sorter {
 
-template <typename RandomIt, typename Compare>
-void block_insertion_sort(RandomIt *S, size_t n, Compare comp,
+template <typename T, typename Compare>
+void block_insertion_sort(T *S, size_t n, Compare comp,
                           size_t k = SEQ_DEFAULT_BLOCK_SIZE) {
   if (n <= k) {
     return bis::__internal::insertion_sort(S, 0, n, comp);
@@ -41,8 +41,8 @@ void block_insertion_sort(RandomIt *S, size_t n, Compare comp,
   if (dt == n) {
     dt >>= potBIS;
   }
-  RandomIt *E = new RandomIt[dt];
-  RandomIt key;
+  T *E = new T[dt];
+  T key;
   while (current_block_size < n) {
     starting_point = 0;
     while (starting_point < n) {
@@ -65,7 +65,7 @@ void block_insertion_sort(RandomIt *S, size_t n, Compare comp,
       //
       if (sorted_block_end_idx >= sorted_block_start_idx) {
         std::memcpy(E, S + sorted_block_start_idx,
-                    copied_block_size * sizeof(RandomIt));
+                    copied_block_size * sizeof(T));
       }
 
       // partimos insertando el tercer bloque...

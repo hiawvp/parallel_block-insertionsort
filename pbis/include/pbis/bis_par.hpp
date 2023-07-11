@@ -13,37 +13,40 @@ namespace parallel_sorter {
 
 namespace {
 
-template <typename RandomIt, typename Compare>
-void multiway_merge_output(RandomIt *arr, RandomIt *output, size_t start,
-                           size_t end, size_t step, Compare comp) {
-#if defined(_USETBB)
+template <typename T, typename Compare>
+void multiway_merge_output(T *arr, T *output, size_t start, size_t end,
+                           size_t step, Compare comp) {
+  // #if defined(_USETBB)
   size_t n = end - start;
   int nseqs = (n + step - 1) / step;
 
   // omp_set_num_threads(p);
   // tbb::global_control c(tbb::global_control::max_allowed_parallelism, p);
-  std::vector<std::pair<RandomIt *, RandomIt *>> seqs;
+  std::vector<std::pair<T *, T *>> seqs;
 
   size_t r, l;
   for (int i = 0; i < nseqs; ++i) {
     l = start + (i * step);
     r = std::min(l + step, end);
-    std::pair<RandomIt *, RandomIt *> pair = std::make_pair(arr + l, arr + r);
+    std::pair<T *, T *> pair = std::make_pair(arr + l, arr + r);
     seqs.push_back(pair);
   }
   __gnu_parallel::multiway_merge(seqs.begin(), seqs.end(), output, n, comp);
 
+#if defined(_USETBB)
   std::copy(std::execution::par, output, output + n, arr + start);
+#else
+  std::copy(output, output + n, arr + start);
 #endif // _USETBB
   return;
 }
 
-template <typename RandomIt, typename Compare>
-void insert_second_block(size_t l, size_t r, size_t current_block_size,
-                         RandomIt *S, RandomIt *E, Compare comp) {
+template <typename T, typename Compare>
+void insert_second_block(size_t l, size_t r, size_t current_block_size, T *S,
+                         T *E, Compare comp) {
   size_t dt = current_block_size;
   long j = r - current_block_size - 1;
-  RandomIt key;
+  T key;
   for (long i = current_block_size - 1; i >= 0; i--) {
     key = E[i];
     while (j >= (long)l && comp(key, S[j])) {
@@ -56,16 +59,16 @@ void insert_second_block(size_t l, size_t r, size_t current_block_size,
   return;
 }
 
-template <typename RandomIt, typename Compare>
-void insert_all_but_second_block(size_t l, size_t r, size_t block_size,
-                                 RandomIt *S, Compare comp) {
+template <typename T, typename Compare>
+void insert_all_but_second_block(size_t l, size_t r, size_t block_size, T *S,
+                                 Compare comp) {
   // inicio del tercer bloque
   size_t ini = l + 2 * block_size;
   // fin del tercer bloque
   size_t end = ini + block_size;
   long j = l + block_size - 1;
   size_t dt;
-  RandomIt key;
+  T key;
   while (ini < r) {
     if (end > r) {
       end = r;
@@ -89,10 +92,10 @@ void insert_all_but_second_block(size_t l, size_t r, size_t block_size,
   return;
 }
 
-template <typename RandomIt, typename Compare>
-void __run_bis_iterative(RandomIt *S, size_t n, int p, int k, int min_segments,
+template <typename T, typename Compare>
+void __run_bis_iterative(T *S, size_t n, int p, int k, int min_segments,
                          Compare comp) {
-  RandomIt *E = new RandomIt[n];
+  T *E = new T[n];
   omp_set_num_threads(p);
 
 #pragma omp parallel for
@@ -106,11 +109,11 @@ void __run_bis_iterative(RandomIt *S, size_t n, int p, int k, int min_segments,
     size_t segment_size = current_block_size * k;
     int segment_count = (n + segment_size - 1) / segment_size;
     if (segment_count < min_segments) {
-#if defined(_USETBB)
+      // #if defined(_USETBB)
       multiway_merge_output(S, E, 0, n, current_block_size, comp);
       delete[] E;
       return;
-#endif // _USETBB
+      // #endif // _USETBB
     }
 #pragma omp parallel for
     for (int segment_idx = 0; segment_idx < segment_count; segment_idx++) {
@@ -121,7 +124,7 @@ void __run_bis_iterative(RandomIt *S, size_t n, int p, int k, int min_segments,
       }
       // starting point;
       size_t E_offset = segment_idx * segment_size;
-      RandomIt *my_E = E + E_offset;
+      T *my_E = E + E_offset;
       size_t sorted_block_start_idx = starting_point + current_block_size;
       size_t sorted_block_end_idx = sorted_block_start_idx + current_block_size;
       size_t copied_block_size = current_block_size;
@@ -132,7 +135,7 @@ void __run_bis_iterative(RandomIt *S, size_t n, int p, int k, int min_segments,
 
       if (sorted_block_end_idx >= sorted_block_start_idx) {
         std::memcpy(my_E, S + sorted_block_start_idx,
-                    copied_block_size * sizeof(RandomIt));
+                    copied_block_size * sizeof(T));
       }
       insert_all_but_second_block(starting_point, ending_point,
                                   current_block_size, S, comp);
@@ -144,14 +147,15 @@ void __run_bis_iterative(RandomIt *S, size_t n, int p, int k, int min_segments,
 }
 } // namespace
 
-template <typename RandomIt, typename Compare>
-void block_insertion_sort(RandomIt *S, size_t n, Compare comp,
+template <typename T, typename Compare>
+void block_insertion_sort(T *S, size_t n, Compare comp,
                           size_t k = PAR_DEFAULT_BLOCK_SIZE,
                           int ss = MWM_SWITCH_STRAT) {
-
+#if !defined(_OPENMP)
+  return bis::sequential_sorter::block_insertion_sort(S, n, comp);
+#endif
   omp_set_max_active_levels(3);
   int p = omp_get_max_threads();
-  // printf("max threads: %d\n", p);
   if (p == 1) {
     return bis::sequential_sorter::block_insertion_sort(S, n, comp);
   }

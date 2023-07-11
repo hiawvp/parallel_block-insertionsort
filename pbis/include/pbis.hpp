@@ -15,16 +15,19 @@ template <typename RandomIT, typename Compare>
 void invoke_parallel_sort(RandomIT first, RandomIT last, Compare comp) {
   size_t n = std::distance(first, last);
   if (n <= bis::SEQUENTIAL_THRESHOLD) {
-    return bis::sequential_sorter::block_insertion_sort(first, n, comp);
+    // return bis::sequential_sorter::block_insertion_sort(first, n, comp);
+    return bis::sequential_sorter::block_insertion_sort(&(*first), n, comp);
   } else {
-    return bis::parallel_sorter::block_insertion_sort(first, n, comp);
+    // return bis::parallel_sorter::block_insertion_sort(first, n, comp);
+    return bis::parallel_sorter::block_insertion_sort(&(*first), n, comp);
   }
 }
 
 template <typename RandomIT, typename Compare>
 void invoke_sequential_sort(RandomIT first, RandomIT last, Compare comp) {
   size_t n = std::distance(first, last);
-  return bis::sequential_sorter::block_insertion_sort(first, n, comp);
+  // return bis::sequential_sorter::block_insertion_sort(first, n, comp);
+  return bis::sequential_sorter::block_insertion_sort(&(*first), n, comp);
 }
 
 } // namespace
@@ -35,6 +38,7 @@ template <typename RandomIT> void sort(RandomIT first, RandomIT last) {
   auto comp = std::less<ValueType>();
   bis::invoke_parallel_sort(first, last, comp);
 }
+
 template <typename RandomIT, typename Compare>
 void sort(RandomIT first, RandomIT last, Compare comp) {
   bis::invoke_parallel_sort(first, last, comp);
