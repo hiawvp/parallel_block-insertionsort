@@ -36,7 +36,6 @@ Please refer to the official sources for installation instructions of oneAPI Thr
 ### Sample code
 
 ```cpp
-
 #include "pbis.hpp"
 
 int main(){
@@ -59,7 +58,7 @@ int main(){
 }
 ```
 
-### Sample code
+### Compiling and running example `main.cpp`
 ```shell
 foo@bar:~$ g++ -Wall -std=c++17 -O3 -fopenmp -I./pbis/include main.cpp -o prog
 foo@bar:~$ ./prog
@@ -69,9 +68,4 @@ Sort result Ok
 TIME  >>>                 std::sort     0.64751839 [s]
 TIME  >>>       bis::parallel::sort     0.28056250 [s]
 Sort result Ok
-
-
-```
-
-```bash
 ```

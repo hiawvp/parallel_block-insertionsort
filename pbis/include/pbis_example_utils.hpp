@@ -50,7 +50,7 @@ template <typename T> int check_results(T *A, T *correct_output, size_t n) {
     std::cout << "Sort result Ok" << std::endl;
     return EXIT_SUCCESS;
   } else {
-    std::cout << "Bad sort unlucky" << std::endl;
+    std::cout << "Bad sort unlucky (n: " << n << ")" << std::endl;
     return EXIT_FAILURE;
   }
 }

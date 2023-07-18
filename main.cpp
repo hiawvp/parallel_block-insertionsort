@@ -13,7 +13,7 @@
 #define DEFAULT_SIZE 7'777'777
 #define DEFAULT_SEED 0
 
-int main(int argc, char *argv[]) {
+int main() {
   srand(DEFAULT_SEED);
   size_t n = DEFAULT_SIZE;
   using datatype = float;
@@ -27,6 +27,17 @@ int main(int argc, char *argv[]) {
   timeit(std::sort(sorted_copy, sorted_copy + n), "std::sort");
   timeit(bis::sort(A, A + n), "bis::sort");
   exit_code = exit_code || check_results(A, sorted_copy, n);
+
+  for (size_t i = 12839; i < DEFAULT_SIZE; i += 37381) {
+    gen_array(A, i);
+    std::copy_n(A, i, sorted_copy);
+    timeit(std::sort(sorted_copy, sorted_copy + i), "std::sort");
+    timeit(bis::parallel::sort(A, A + i), "bis::parallel::sorts");
+    if (check_results(A, sorted_copy, i))
+      return 1;
+  }
+
+  return 1;
 
   gen_array(A, n);
   std::copy_n(A, n, sorted_copy);
@@ -93,6 +104,8 @@ int main(int argc, char *argv[]) {
 
   // std::cout << "Press Enter to close" << std::endl;
   // std::cin.ignore();
+  delete[] A;
+  delete[] sorted_copy;
 
   return exit_code;
 }

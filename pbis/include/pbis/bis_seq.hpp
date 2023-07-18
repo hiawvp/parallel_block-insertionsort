@@ -16,11 +16,13 @@ const int SEQUENTIAL_THRESHOLD = 2 << 15;
 const int SEQ_DEFAULT_BLOCK_SIZE = 16;
 const int PAR_DEFAULT_BLOCK_SIZE = 8;
 const int MWM_SWITCH_STRAT = 0;
+const int PSPLIT_DEFAULT_BLOCK_SIZE = 16;
+const int PSPLIT_DEFAULT_SPLIT_FACTOR = 1;
 namespace sequential_sorter {
 
 template <typename T, typename Compare>
-void block_insertion_sort(T *S, size_t n, Compare comp,
-                          size_t k = SEQ_DEFAULT_BLOCK_SIZE) {
+void __run_block_insertion_sort(T *S, T *E, size_t n, Compare comp,
+                                size_t k = SEQ_DEFAULT_BLOCK_SIZE) {
   if (n <= k) {
     return bis::__internal::insertion_sort(S, 0, n, comp);
   }
@@ -34,14 +36,6 @@ void block_insertion_sort(T *S, size_t n, Compare comp,
   size_t delta;
   long j;
 
-  size_t dt = std::log(n) / std::log(k);
-  dt = std::pow(k, dt);
-  size_t potBIS = std::log2(k);
-
-  if (dt == n) {
-    dt >>= potBIS;
-  }
-  T *E = new T[dt];
   T key;
   while (current_block_size < n) {
     starting_point = 0;
@@ -115,6 +109,23 @@ void block_insertion_sort(T *S, size_t n, Compare comp,
     }
     current_block_size *= k;
   }
+}
+
+template <typename T, typename Compare>
+void block_insertion_sort(T *S, size_t n, Compare comp,
+                          size_t k = SEQ_DEFAULT_BLOCK_SIZE) {
+  if (n <= k) {
+    return bis::__internal::insertion_sort(S, 0, n, comp);
+  }
+  size_t dt = std::log(n) / std::log(k);
+  dt = std::pow(k, dt);
+  size_t potBIS = std::log2(k);
+
+  if (dt == n) {
+    dt >>= potBIS;
+  }
+  T *E = new T[dt];
+  __run_block_insertion_sort(S, E, n, comp, k);
   delete[] E;
   return;
 }

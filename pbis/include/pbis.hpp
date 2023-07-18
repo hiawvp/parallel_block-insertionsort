@@ -18,8 +18,8 @@ void invoke_parallel_sort(RandomIT first, RandomIT last, Compare comp) {
     // return bis::sequential_sorter::block_insertion_sort(first, n, comp);
     return bis::sequential_sorter::block_insertion_sort(&(*first), n, comp);
   } else {
-    // return bis::parallel_sorter::block_insertion_sort(first, n, comp);
-    return bis::parallel_sorter::block_insertion_sort(&(*first), n, comp);
+    // return bis::parallel_sorter::block_insertion_sort(&(*first), n, comp);
+    return bis::parallel_sorter::hybrid_pbis_psplip(&(*first), n, comp);
   }
 }
 

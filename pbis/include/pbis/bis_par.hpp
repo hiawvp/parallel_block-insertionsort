@@ -4,7 +4,6 @@
 #include "./bis_seq.hpp"
 #include "execution"
 #include "omp.h"
-#include <cstdio>
 #include <parallel/algorithm>
 
 namespace bis {
@@ -15,17 +14,22 @@ namespace {
 
 template <typename T, typename Compare>
 void multiway_merge_output(T *arr, T *output, size_t start, size_t end,
-                           size_t step, Compare comp) {
+                           size_t step, Compare comp, int nseqs = 0) {
   // #if defined(_USETBB)
   size_t n = end - start;
-  int nseqs = (n + step - 1) / step;
+  int __seqs;
+  if (nseqs == 0) {
+    __seqs = (n + step - 1) / step;
+  } else {
+    __seqs = nseqs;
+  }
 
   // omp_set_num_threads(p);
   // tbb::global_control c(tbb::global_control::max_allowed_parallelism, p);
   std::vector<std::pair<T *, T *>> seqs;
 
   size_t r, l;
-  for (int i = 0; i < nseqs; ++i) {
+  for (int i = 0; i < __seqs; ++i) {
     l = start + (i * step);
     r = std::min(l + step, end);
     std::pair<T *, T *> pair = std::make_pair(arr + l, arr + r);
@@ -146,11 +150,35 @@ void __run_bis_iterative(T *S, size_t n, int p, int k, int min_segments,
   delete[] E;
 }
 } // namespace
+//
 
 template <typename T, typename Compare>
-void block_insertion_sort(T *S, size_t n, Compare comp,
-                          size_t k = PAR_DEFAULT_BLOCK_SIZE,
-                          int ss = MWM_SWITCH_STRAT) {
+void hybrid_pbis_psplip(T *S, size_t n, Compare comp,
+                        int k = PSPLIT_DEFAULT_BLOCK_SIZE) {
+#if !defined(_OPENMP)
+  return bis::sequential_sorter::block_insertion_sort(S, n, comp);
+#endif
+  omp_set_max_active_levels(3);
+  int p = omp_get_max_threads();
+  if (p == 1) {
+    return bis::sequential_sorter::block_insertion_sort(S, n, comp);
+  }
+  omp_set_num_threads(p);
+  size_t np = std::ceil((n + p - 1) / p);
+  T *E = new T[n];
+#pragma omp parallel for
+  for (size_t i = 0; i < (size_t)p; i++) {
+    size_t il = i * np;
+    size_t ir = std::min(np, n - il);
+    sequential_sorter::__run_block_insertion_sort(S + il, E + il, ir, comp, k);
+  }
+  multiway_merge_output(S, E, 0, n, np, comp, p);
+  delete[] E;
+}
+
+template <typename T, typename Compare>
+void hybrid_pbis(T *S, size_t n, Compare comp,
+                 size_t k = PAR_DEFAULT_BLOCK_SIZE, int ss = MWM_SWITCH_STRAT) {
 #if !defined(_OPENMP)
   return bis::sequential_sorter::block_insertion_sort(S, n, comp);
 #endif
