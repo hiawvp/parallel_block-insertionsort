@@ -37,6 +37,7 @@ Please refer to the official sources for installation instructions of oneAPI Thr
 
 ```cpp
 #include "pbis.hpp"
+#include <vector>
 
 int main(){
   int n = 1 << 18;
