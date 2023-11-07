@@ -61,7 +61,7 @@ this will generate, for each experiment, a json file that has the following sche
             "number"
           ]
         }
-      }
+      ]
     }
   ]
 }
