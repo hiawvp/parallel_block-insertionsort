@@ -1,0 +1,7 @@
+c++
+-std=c++17
+-lpthread
+-D_REENTRANT
+-latomic
+-I./external/ips4o/include  
+-I./external/ips2ra/include  
