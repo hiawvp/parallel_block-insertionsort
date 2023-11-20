@@ -8,10 +8,9 @@ Héctor Ferrada,
 A sorting algorithm based on ordered block insertions,
 Journal of Computational Science,
 
-### PBIS - Titulo pendiente lol
-sorting on multicore and manycore, an OpenMP-based parallel
-implementation of Block-InsertionSort, etc
-jvasquez INFO298 
+## PBiS
+
+OpenMP-based parallel implementation of Block-InsertionSort
 
 ## Requirements
 
