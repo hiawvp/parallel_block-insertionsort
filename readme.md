@@ -8,9 +8,9 @@ Héctor Ferrada,
 A sorting algorithm based on ordered block insertions,
 Journal of Computational Science,
 
-## PBiS
+## Parallel Block Insertion (PBiS)
 
-OpenMP-based parallel implementation of Block-InsertionSort
+An OpenMP-based parallel implementation of Block-InsertionSort
 
 ## Requirements
 
